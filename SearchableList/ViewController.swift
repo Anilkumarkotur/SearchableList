@@ -91,7 +91,10 @@ extension ViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchingState = .searching
-        searchedCountry = countryNameArr.filter({$0.name.lowercased().prefix(searchText.count) == searchText.lowercased()})
+        searchedCountry = countryNameArr.filter({
+            $0.name.lowercased().prefix(searchText.count) == searchText.lowercased() ||
+            $0.dialCode.contains(searchText)
+        })
         self.theTableView.reloadData()
     }
     
