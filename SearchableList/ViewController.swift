@@ -68,33 +68,40 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    fileprivate func updateSearchedCountryFor(searchText: String) {
+        searchedCountry = countryNameArr.filter({
+            $0.name.lowercased().prefix(searchText.count) == searchText.lowercased() ||
+                $0.dialCode.contains(searchText)
+        })
+    }
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.getNumberOfRowsInSection()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = UITableViewCell(style: .value1, reuseIdentifier: "")
         let countryName = self.getCountryNameInfoFor(indexPath: indexPath).0
+        let countryCode = self.getCountryNameInfoFor(indexPath: indexPath).1
         
         cell.textLabel?.text = countryName
-        cell.detailTextLabel?.text = self.getCountryNameInfoFor(indexPath: indexPath).1
+        cell.detailTextLabel?.text = countryCode
         cell.imageView?.image = UIImage(named: countryName)
+        
         return cell
     }
 }
 
 extension ViewController: UISearchBarDelegate {
     
-    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchingState = .searching
-        searchedCountry = countryNameArr.filter({
-            $0.name.lowercased().prefix(searchText.count) == searchText.lowercased() ||
-            $0.dialCode.contains(searchText)
-        })
+        self.updateSearchedCountryFor(searchText: searchText)
         self.theTableView.reloadData()
     }
     
