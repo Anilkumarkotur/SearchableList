@@ -15,6 +15,13 @@ enum ListState {
 struct Country: Decodable {
     var name: String
     var dialCode: String
+    var code: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name = "name"
+        case dialCode = "dial_code"
+        case code = "code"
+    }
 }
 
 class ViewController: UIViewController {
@@ -38,12 +45,12 @@ class ViewController: UIViewController {
         theTableView.dataSource = self
     }
     
-    fileprivate func getCountryNameInfoFor(indexPath: IndexPath) -> (String, String) {
+    fileprivate func getCountryNameInfoFor(indexPath: IndexPath) -> Country {
         switch searchingState {
         case .searching:
-            return (searchedCountry[indexPath.row].name, searchedCountry[indexPath.row].dialCode )
+            return searchedCountry[indexPath.row]
         case .idle:
-            return (countryNameArr[indexPath.row].name, countryNameArr[indexPath.row].dialCode)
+            return countryNameArr[indexPath.row]
         }
     }
     
@@ -57,15 +64,11 @@ class ViewController: UIViewController {
     }
     
     fileprivate func getCountryList() {
-        let currentBundle = Bundle(for: ViewController.self) //Check for alternative in product
-        
-        if let path = currentBundle.path(forResource: "CountryCodes", ofType: "json") {
-            guard let dataFormJsonFile = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
-                return
-            }
-            if let countryList = try? JSONDecoder().decode([Country].self, from: dataFormJsonFile) {
-                self.countryNameArr = countryList
-            }
+        let resourceBundle = Bundle(for: ViewController.classForCoder())
+        guard let path = resourceBundle.path(forResource: "CallingCodes", ofType: "plist") else { return }
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return }
+        if let countryList = try? PropertyListDecoder().decode([Country].self, from: data) {
+            self.countryNameArr = countryList
         }
     }
     
@@ -86,13 +89,17 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .value1, reuseIdentifier: "")
-        let countryName = self.getCountryNameInfoFor(indexPath: indexPath).0
-        let countryCode = self.getCountryNameInfoFor(indexPath: indexPath).1
+        let countryName = self.getCountryNameInfoFor(indexPath: indexPath).name
+        let countryCode = self.getCountryNameInfoFor(indexPath: indexPath).code
+        let countryDialCode = self.getCountryNameInfoFor(indexPath: indexPath).dialCode
         
-        cell.textLabel?.text = countryName
-        cell.detailTextLabel?.text = countryCode
-        cell.imageView?.image = UIImage(named: countryName)
+        if let emojiFlag =  emojiFlag(regionCode: countryCode) {
+            cell.textLabel?.text = emojiFlag + " " + countryName 
+        } else {
+            cell.textLabel?.text = countryName
+        }
         
+        cell.detailTextLabel?.text = countryDialCode
         return cell
     }
 }
