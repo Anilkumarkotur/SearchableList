@@ -1,6 +1,6 @@
 # SearchableList
 
-Swift projet to list down available countries dail Code and allows search. 
+Swift project to list down available countries dial Code and allows search. 
 
 ## What is the unique about this project 
   As shown in the below demo to list country dial code we used flags, in majority of times to show flags we use pngs but this project uses emojis 🙀, yes emojis. 
